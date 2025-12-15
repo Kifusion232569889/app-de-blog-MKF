@@ -1,6 +1,7 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { BlogPost as BlogPostType } from '../types';
-import ReactMarkdown from 'react-markdown';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 // Simple markdown renderer since we can't easily add heavy deps. 
 // We will inject the content into a container with styles defined in index.html
@@ -10,6 +11,18 @@ interface Props {
 }
 
 const BlogPostViewer: React.FC<Props> = ({ data }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  // Word count and truncation logic
+  const words = data.content.trim().split(/\s+/);
+  const wordCount = words.length;
+  const isLongPost = wordCount > 500;
+
+  // Determine what text to display
+  const displayedContent = (isLongPost && !isExpanded) 
+    ? words.slice(0, 500).join(' ') + '...' 
+    : data.content;
+
   // Function to process markdown simply for the view
   // We use the CSS class 'markdown-content' defined in index.html to style standard HTML tags
   
@@ -40,8 +53,30 @@ const BlogPostViewer: React.FC<Props> = ({ data }) => {
       <div className="p-8 md:p-12">
         <div 
           className="markdown-content"
-          dangerouslySetInnerHTML={{ __html: parseMarkdown(data.content) }}
+          dangerouslySetInnerHTML={{ __html: parseMarkdown(displayedContent) }}
         />
+
+        {isLongPost && (
+          <div className="mt-8 flex justify-center relative">
+            {!isExpanded && (
+              <div className="absolute -top-24 left-0 w-full h-24 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+            )}
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="group flex items-center gap-2 px-6 py-3 rounded-full bg-gray-50 hover:bg-gray-100 border border-gray-200 text-ki-dark font-semibold transition-all hover:shadow-md z-10"
+            >
+              {isExpanded ? (
+                <>
+                  Leer menos <ChevronUp size={18} className="text-ki-purple group-hover:-translate-y-0.5 transition-transform" />
+                </>
+              ) : (
+                <>
+                  Leer el artículo completo <ChevronDown size={18} className="text-ki-purple group-hover:translate-y-0.5 transition-transform" />
+                </>
+              )}
+            </button>
+          </div>
+        )}
       </div>
     </article>
   );
