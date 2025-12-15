@@ -137,7 +137,9 @@ export const generateKiFusionPost = async (
     6. **Formato:** Markdown limpio.
 
     # PROMPT DE IMAGEN
-    Al final, genera un separador "---IMAGE_PROMPT_START---" seguido de un prompt en inglés para generar una imagen. Estilo: "Ethereal, Quantum, High Tech Wellness, Soft Lighting, Abstract representation of the emotion".
+    Al final del documento, es OBLIGATORIO que incluyas un separador explícito:
+    "---IMAGE_PROMPT_START---"
+    Seguido de un prompt en inglés para generar una imagen. Estilo: "Ethereal, Quantum, High Tech Wellness, Soft Lighting, Abstract representation of the emotion".
   `;
 
   const response = await ai.models.generateContent({
@@ -151,10 +153,19 @@ export const generateKiFusionPost = async (
 
   const fullText = response.text || "";
 
-  // Extract content and prompt
-  const parts = fullText.split("---IMAGE_PROMPT_START---");
-  const content = parts[0].trim();
-  const imagePrompt = parts.length > 1 ? parts[1].trim() : "Abstract energy healing visualization, soft colors, ethereal, 4k";
+  // Robust Splitting logic
+  // Sometimes models put the delimiter in bold or code blocks
+  const delimiterRegex = /---IMAGE_PROMPT_START---/i;
+  const parts = fullText.split(delimiterRegex);
+  
+  let content = parts[0].trim();
+  let imagePrompt = "";
+
+  if (parts.length > 1) {
+    imagePrompt = parts[1].trim();
+    // Clean up if the prompt is inside markdown block
+    imagePrompt = imagePrompt.replace(/`/g, '').trim();
+  }
 
   // Extract title
   const lines = content.split('\n');
@@ -163,7 +174,7 @@ export const generateKiFusionPost = async (
 
   return {
     title,
-    content,
+    content, 
     imagePrompt
   };
 };

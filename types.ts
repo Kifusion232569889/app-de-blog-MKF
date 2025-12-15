@@ -1,4 +1,7 @@
+
 export interface BlogPost {
+  id?: string; // Unique ID for persistence
+  createdAt?: number; // Timestamp
   title: string;
   content: string; // The full markdown content
   imagePrompt: string;
