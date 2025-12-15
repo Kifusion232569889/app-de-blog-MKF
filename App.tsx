@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { Wand2, Download, Feather, BookOpen, ImageIcon, Info, Sparkles, Map, FileText, Newspaper, Globe, Link as LinkIcon, BarChart3, Settings, UploadCloud } from 'lucide-react';
+import { Wand2, Download, Feather, BookOpen, ImageIcon, Info, Sparkles, Map, FileText, Newspaper, Globe, Link as LinkIcon, BarChart3, Settings, UploadCloud, History } from 'lucide-react';
 import { generateKiFusionPost, generateImageFromPrompt } from './services/geminiService';
 import { publishToWix } from './services/wixService';
 import { GenerationState, WixSettings } from './types';
@@ -11,11 +12,22 @@ import WixConfigModal from './components/WixConfigModal';
 type ActiveTab = 'blog' | 'game';
 type BlogMode = 'standard' | 'news' | 'analysis';
 
+interface PromptHistoryItem {
+  context: string;
+  mode: BlogMode;
+  referenceUrl?: string;
+  timestamp: number;
+}
+
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('blog');
   const [blogMode, setBlogMode] = useState<BlogMode>('standard');
   const [customContext, setCustomContext] = useState('');
   const [referenceUrl, setReferenceUrl] = useState('');
+  
+  // History State
+  const [promptHistory, setPromptHistory] = useState<PromptHistoryItem[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
   
   // Wix State
   const [showWixModal, setShowWixModal] = useState(false);
@@ -31,11 +43,20 @@ const App: React.FC = () => {
     isImageLoading: false,
   });
 
-  // Load Wix settings from localStorage on mount
+  // Load settings from localStorage on mount
   useEffect(() => {
     const savedWix = localStorage.getItem('wixSettings');
     if (savedWix) {
       setWixSettings(JSON.parse(savedWix));
+    }
+    
+    try {
+      const savedHistory = localStorage.getItem('promptHistory');
+      if (savedHistory) {
+        setPromptHistory(JSON.parse(savedHistory));
+      }
+    } catch (e) {
+      console.error("Error loading history", e);
     }
   }, []);
 
@@ -43,11 +64,46 @@ const App: React.FC = () => {
     setWixSettings(settings);
     localStorage.setItem('wixSettings', JSON.stringify(settings));
   };
+  
+  const restoreFromHistory = (item: PromptHistoryItem) => {
+    setCustomContext(item.context);
+    setBlogMode(item.mode);
+    setReferenceUrl(item.referenceUrl || '');
+    setShowHistory(false);
+  };
+
+  const clearHistory = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if(confirm('¿Estás seguro de borrar el historial?')) {
+      setPromptHistory([]);
+      localStorage.removeItem('promptHistory');
+      setShowHistory(false);
+    }
+  };
 
   const handleGenerateBlog = async () => {
     if (blogMode === 'analysis' && !referenceUrl) {
       alert("Por favor ingresa la URL del post que deseas analizar.");
       return;
+    }
+
+    // Save to history if context is provided
+    if (customContext.trim()) {
+      const newItem: PromptHistoryItem = {
+        context: customContext,
+        mode: blogMode,
+        referenceUrl: blogMode === 'analysis' ? referenceUrl : undefined,
+        timestamp: Date.now()
+      };
+
+      const newHistory = [newItem, ...promptHistory.filter(h => 
+        h.context !== newItem.context || 
+        h.mode !== newItem.mode || 
+        (h.mode === 'analysis' && h.referenceUrl !== newItem.referenceUrl)
+      )].slice(0, 10);
+
+      setPromptHistory(newHistory);
+      localStorage.setItem('promptHistory', JSON.stringify(newHistory));
     }
 
     setState(prev => ({ ...prev, isLoading: true, error: null, generatedImageUrl: null }));
@@ -225,10 +281,59 @@ const App: React.FC = () => {
                 </div>
               )}
 
-              <div className="mb-6">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  {blogMode === 'news' ? 'Tema de Búsqueda' : 'Tema del Nuevo Post'}
-                </label>
+              <div className="mb-6 relative">
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-sm font-semibold text-gray-700">
+                    {blogMode === 'news' ? 'Tema de Búsqueda' : 'Tema del Nuevo Post'}
+                  </label>
+                  
+                  {promptHistory.length > 0 && (
+                    <div className="relative">
+                      <button 
+                        onClick={() => setShowHistory(!showHistory)}
+                        className="text-xs flex items-center gap-1 text-ki-purple hover:text-ki-dark font-medium transition-colors bg-purple-50 px-2 py-1 rounded-md hover:bg-purple-100"
+                      >
+                        <History size={14} /> Recientes
+                      </button>
+                      
+                      {showHistory && (
+                        <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-100 z-20 overflow-hidden animate-fade-in-up">
+                          <div className="p-3 bg-gray-50 border-b border-gray-100 flex justify-between items-center">
+                            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Historial</span>
+                            <div className="flex gap-2">
+                                <button onClick={clearHistory} className="text-red-400 hover:text-red-600 text-xs underline">Borrar</button>
+                                <button onClick={() => setShowHistory(false)} className="text-gray-400 hover:text-gray-600 text-xs">Cerrar</button>
+                            </div>
+                          </div>
+                          <div className="max-h-64 overflow-y-auto">
+                            {promptHistory.map((item, idx) => (
+                              <button
+                                key={idx}
+                                onClick={() => restoreFromHistory(item)}
+                                className="w-full text-left p-3 hover:bg-purple-50 transition-colors border-b border-gray-50 last:border-0 group"
+                              >
+                                <div className="text-xs text-gray-400 mb-1 flex items-center justify-between">
+                                  <span>{new Date(item.timestamp).toLocaleDateString()}</span>
+                                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                                    item.mode === 'news' ? 'bg-teal-100 text-teal-700' :
+                                    item.mode === 'analysis' ? 'bg-amber-100 text-amber-700' :
+                                    'bg-purple-100 text-purple-700'
+                                  }`}>
+                                    {item.mode === 'news' ? 'NEWS' : item.mode === 'analysis' ? 'CLONE' : 'STD'}
+                                  </span>
+                                </div>
+                                <p className="text-sm font-medium text-gray-700 line-clamp-2 group-hover:text-ki-purple">
+                                  {item.context}
+                                </p>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
                 <textarea
                   className="w-full p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-ki-purple focus:border-transparent outline-none transition-all bg-white/50 text-gray-700 resize-none h-24"
                   placeholder={
