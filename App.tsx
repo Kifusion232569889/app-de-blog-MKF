@@ -45,9 +45,13 @@ const App: React.FC = () => {
 
   // Load settings from localStorage on mount
   useEffect(() => {
-    const savedWix = localStorage.getItem('wixSettings');
-    if (savedWix) {
-      setWixSettings(JSON.parse(savedWix));
+    try {
+      const savedWix = localStorage.getItem('wixSettings');
+      if (savedWix) {
+        setWixSettings(JSON.parse(savedWix));
+      }
+    } catch (e) {
+      console.error("Error parsing saved Wix settings", e);
     }
     
     try {
@@ -190,7 +194,7 @@ const App: React.FC = () => {
                {activeTab === 'blog' && (
                  <button 
                     onClick={() => setShowWixModal(true)}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${wixSettings.apiKey ? 'text-ki-teal bg-teal-50' : 'text-gray-400 hover:text-gray-600'}`}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${wixSettings.apiKey ? 'text-ki-teal bg-teal-50 shadow-sm border border-teal-100' : 'text-gray-400 hover:text-gray-600'}`}
                     title="Configurar Wix"
                  >
                     <Settings size={18} />

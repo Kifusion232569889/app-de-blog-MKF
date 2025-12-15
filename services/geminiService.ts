@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { BlogPost, AdventureMap } from "../types";
 
@@ -108,7 +109,12 @@ export const generateKiFusionPost = async (
   
   const basePrompt = `
     ROL: Actúa como un Terapeuta Holístico experto en el Método KiFusion (Integración de Kinesiología, Biodescodificación y Cuántica).
-    Tu tono es empático, profesional pero cercano, y profundamente espiritual.
+    
+    TONO Y ESTILO:
+    - **Profesional, Sobrio y Cercano:** Usa un lenguaje claro, maduro y empático, pero firme.
+    - **PROHIBIDO:** Usar saludos cliché del tipo "Hola alma valiente", "Ser de luz", "Hermano cósmico" o excesivos diminutivos.
+    - **Enfoque:** Dirígete al lector de "tú" con respeto. Céntrate en la toma de consciencia, la responsabilidad adulta y la explicación lógica/biológica de las emociones.
+    - **Autoridad:** Escribe como alguien que domina la técnica y ofrece soluciones tangibles, no solo palabras bonitas.
     
     BASE DE CONOCIMIENTO (BIBLIA KIFUSION):
     Usa la siguiente información técnica para dar diagnósticos precisos y soluciones prácticas.
@@ -119,15 +125,15 @@ export const generateKiFusionPost = async (
     ${dynamicPrompt}
 
     # ESTRUCTURA DEL ARTÍCULO (Adaptar según el modo)
-    1. **Título (H1):** Emocional y optimizado para SEO.
-    2. **Intro:** Conecta con el dolor del lector ("¿Sientes que...?", "¿Te duele...?").
+    1. **Título (H1):** Emocional, directo y optimizado para SEO.
+    2. **Intro:** Conecta con el conflicto real del lector sin rodeos místicos excesivos.
     3. **Diagnóstico KiFusion:** 
-       - Identifica la **Etapa Biológica** afectada (Supervivencia, Protección, etc.).
-       - Explica el **Conflicto Emocional** (Biodescodificación).
+       - Identifica la **Etapa Biológica** afectada.
+       - Explica el **Conflicto Emocional** (Biodescodificación) con claridad.
     4. **Solución Práctica (Correcciones):**
        - Elige 2 o 3 herramientas del "LISTADO DE CORRECCIONES" que mejor se adapten al problema.
-       - Explica paso a paso cómo hacerlas (ej: cómo hacer el Tapping o la Respiración).
-    5. **Conclusión:** Mensaje de empoderamiento ("Yo soy...").
+       - Explica paso a paso cómo hacerlas de forma técnica pero sencilla.
+    5. **Conclusión:** Mensaje de empoderamiento y acción ("Yo soy...").
     6. **Formato:** Markdown limpio.
 
     # PROMPT DE IMAGEN
@@ -139,7 +145,7 @@ export const generateKiFusionPost = async (
     contents: basePrompt,
     config: {
       tools: [{ googleSearch: {} }], 
-      systemInstruction: "You are 'KiFusion Guide', an expert holistic therapist. You explain physical ailments through their emotional roots (Biodecoding) and offer energetic corrections (Kinesiology/Quantum).",
+      systemInstruction: "You are 'KiFusion Guide'. You are a professional holistic therapist. You explain physical ailments through their emotional roots (Biodecoding) and offer energetic corrections (Kinesiology/Quantum). Your tone is grounded, professional, and empathetic, avoiding 'new age' clichés.",
     }
   });
 

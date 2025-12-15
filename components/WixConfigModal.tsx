@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { Save, X, Eye, EyeOff, HelpCircle, ExternalLink } from 'lucide-react';
+import { Save, X, Eye, EyeOff, HelpCircle, ExternalLink, CheckCircle, Trash2 } from 'lucide-react';
 import { WixSettings } from '../types';
 
 interface Props {
@@ -28,6 +29,16 @@ const WixConfigModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialSetti
     onClose();
   };
 
+  const handleClear = () => {
+    if(confirm("¿Estás seguro de que quieres borrar las credenciales guardadas? Tendrás que volver a ingresarlas.")) {
+      onSave({ apiKey: '', siteId: '' });
+      setApiKey('');
+      setSiteId('');
+    }
+  };
+
+  const isConfigured = !!initialSettings.apiKey;
+
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose}></div>
@@ -45,6 +56,13 @@ const WixConfigModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialSetti
              <p className="text-sm text-gray-500">Configuración de API para publicar borradores</p>
            </div>
         </div>
+
+        {isConfigured && (
+          <div className="mb-6 p-3 bg-teal-50 text-teal-800 rounded-lg text-sm flex items-center gap-2 border border-teal-100">
+            <CheckCircle size={16} className="text-teal-600" />
+            <span className="font-medium">Tus credenciales están guardadas en este navegador.</span>
+          </div>
+        )}
 
         <div className="space-y-6">
           
@@ -99,6 +117,15 @@ const WixConfigModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialSetti
         </div>
 
         <div className="mt-8 flex gap-3">
+            {isConfigured && (
+              <button 
+                onClick={handleClear}
+                className="px-4 py-3.5 text-red-500 hover:bg-red-50 rounded-xl transition-colors border border-transparent hover:border-red-100"
+                title="Borrar credenciales guardadas"
+              >
+                <Trash2 size={18} />
+              </button>
+            )}
             <button 
               onClick={onClose}
               className="flex-1 py-3.5 text-gray-700 font-semibold hover:bg-gray-100 rounded-xl transition-colors bg-white border border-gray-200"
@@ -109,7 +136,7 @@ const WixConfigModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialSetti
               onClick={handleSave}
               className="flex-1 py-3.5 bg-gray-900 text-white font-semibold rounded-xl hover:bg-black hover:shadow-lg transition-all flex items-center justify-center gap-2"
             >
-              <Save size={18} /> Guardar Conexión
+              <Save size={18} /> {isConfigured ? 'Actualizar' : 'Guardar Conexión'}
             </button>
         </div>
       </div>
