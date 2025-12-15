@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KiFusion Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              serif: ['"Cormorant Garamond"', 'serif'],
+              sans: ['"Montserrat"', 'sans-serif'],
+            },
+            colors: {
+              ki: {
+                purple: '#8b5cf6',
+                teal: '#2dd4bf',
+                gold: '#fbbf24',
+                dark: '#1e293b',
+                light: '#f8fafc'
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        background: linear-gradient(135deg, #f3e8ff 0%, #e0f2fe 100%);
+        min-height: 100vh;
+      }
+      .glass-panel {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+      .markdown-content h1 { font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; color: #4c1d95; margin-bottom: 1rem; line-height: 1.1; font-weight: 700; }
+      .markdown-content h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; color: #5b21b6; margin-top: 1.5rem; margin-bottom: 0.75rem; font-weight: 600; }
+      .markdown-content h3 { font-family: 'Montserrat', sans-serif; font-size: 1.3rem; color: #0d9488; margin-top: 1.25rem; margin-bottom: 0.5rem; font-weight: 600; }
+      .markdown-content p { margin-bottom: 1rem; line-height: 1.7; color: #334155; font-size: 1.05rem; }
+      .markdown-content ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
+      .markdown-content li { margin-bottom: 0.5rem; color: #334155; }
+      .markdown-content strong { color: #4c1d95; font-weight: 600; }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-markdown": "https://esm.sh/react-markdown@^10.1.0",
+    "lucide-react": "https://esm.sh/lucide-react@^0.561.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.33.0"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

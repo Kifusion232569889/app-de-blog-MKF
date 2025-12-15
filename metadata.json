@@ -1,0 +1,5 @@
+{
+  "name": "KiFusion Blog Generator",
+  "description": "A specialized holistic content generator for Método KiFusion using Gemini 2.5 and Search Grounding.",
+  "requestFramePermissions": []
+}
