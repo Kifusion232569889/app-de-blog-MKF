@@ -1,11 +1,14 @@
 
 export interface BlogPost {
-  id?: string; // Unique ID for persistence
-  createdAt?: number; // Timestamp
+  id?: string;
+  createdAt?: number;
   title: string;
-  content: string; // The full markdown content
+  content: string;
   imagePrompt: string;
 }
+
+export type ImageStyle = 'cinematic' | 'abstract' | 'zen' | 'anatomical' | 'watercolor';
+export type ImageSize = '1K' | '2K';
 
 export interface GenerationState {
   isLoading: boolean;
@@ -15,27 +18,31 @@ export interface GenerationState {
   isImageLoading: boolean;
 }
 
-export enum GeneratorMode {
-  BLOG = 'BLOG',
-  IMAGE = 'IMAGE',
-  GAME = 'GAME'
+export interface WordPressSettings {
+  siteUrl: string;
+  username: string;
+  applicationPassword: string;
 }
 
+// Added missing WixSettings interface for Wix integration
 export interface WixSettings {
   apiKey: string;
   siteId: string;
 }
 
-// Adventure Game Types
-
 export interface GameRoom {
   id: string;
   name: string;
   description: string;
-  exits: { [direction: string]: string }; // e.g., { "north": "room2" }
-  encounter?: string; // Description of a blockage or challenge
-  item?: string; // Item to pick up
-  lockedBy?: string; // ID of item needed to enter (optional)
+  exits: {
+    [key: string]: string | undefined;
+    north?: string;
+    south?: string;
+    east?: string;
+    west?: string;
+  };
+  encounter?: string;
+  item?: string;
 }
 
 export interface AdventureMap {

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { BlogPost as BlogPostType } from '../types';
-import { ChevronDown, ChevronUp, Edit3, Save } from 'lucide-react';
+import { ChevronDown, ChevronUp, Edit3, Save, Sparkles } from 'lucide-react';
 
 interface Props {
   data: BlogPostType;
@@ -14,7 +14,6 @@ const BlogPostViewer: React.FC<Props> = ({ data, onUpdateContent }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editableContent, setEditableContent] = useState(data.content);
 
-  // Sync internal state if parent data changes
   useEffect(() => {
     setEditableContent(data.content);
   }, [data.content]);
@@ -24,79 +23,74 @@ const BlogPostViewer: React.FC<Props> = ({ data, onUpdateContent }) => {
     setIsEditing(false);
   };
 
-  // Logic to show "Read More" only if content is very long
   const words = editableContent.trim().split(/\s+/);
   const isLongPost = words.length > 500;
   
-  // If not expanded and not editing, show truncate text
-  // NOTE: For ReactMarkdown, we pass the full text if expanded, or a slice if not.
-  // However, slicing markdown can break formatting (leaving unclosed tags). 
-  // For a cleaner UI, we generally render full content but use CSS height masking, 
-  // but to keep it simple and safe with the library:
   const contentToRender = (isLongPost && !isExpanded && !isEditing) 
-    ? words.slice(0, 150).join(' ') + '...\n\n*(Continúa leyendo abajo)*' 
+    ? words.slice(0, 150).join(' ') + '...\n\n*(Continúa leyendo para descubrir el ejercicio de hoy)*' 
     : editableContent;
 
   return (
-    <article className="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden mb-12 border border-gray-100 relative group">
+    <article className="max-w-4xl mx-auto bg-white shadow-2xl rounded-[2.5rem] overflow-hidden mb-12 border border-gray-100 relative group animate-fade-in">
       
-      {/* Editor/Viewer Toggle */}
-      <div className="absolute top-4 right-4 z-20 flex gap-2">
+      <div className="absolute top-6 right-6 z-20 flex gap-2">
          {isEditing ? (
             <button 
               onClick={handleSaveEdit}
-              className="flex items-center gap-2 bg-ki-teal text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-md hover:bg-teal-600 transition-colors"
+              className="flex items-center gap-2 bg-ki-teal text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg hover:bg-teal-600 transition-all scale-100 hover:scale-105"
             >
-              <Save size={16} /> Terminar Edición
+              <Save size={16} /> Guardar Cambios
             </button>
          ) : (
             <button 
               onClick={() => setIsEditing(true)}
-              className="flex items-center gap-2 bg-gray-100 text-gray-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-white hover:text-ki-purple hover:shadow transition-all"
+              className="flex items-center gap-2 bg-white/90 backdrop-blur text-gray-600 px-5 py-2.5 rounded-xl text-sm font-bold hover:text-ki-purple shadow-sm border border-gray-100 transition-all hover:shadow-md"
             >
-              <Edit3 size={16} /> Editar Texto
+              <Edit3 size={16} /> Refinar Contenido
             </button>
          )}
       </div>
 
-      <div className="h-2 bg-gradient-to-r from-ki-purple via-ki-teal to-ki-gold"></div>
+      <div className="h-3 bg-gradient-to-r from-ki-purple via-ki-teal to-ki-gold"></div>
       
-      <div className="p-8 md:p-12">
-        {/* Explicit Title Rendering */}
+      <div className="p-10 md:p-16">
         {!isEditing && (
-          <h1 className="font-serif text-4xl md:text-5xl font-bold text-ki-purple mb-8 leading-tight border-b pb-6 border-gray-100">
-            {data.title}
-          </h1>
+          <div className="mb-10 text-center">
+            <h1 className="font-serif text-4xl md:text-6xl font-black text-ki-dark mb-6 leading-tight">
+              {data.title}
+            </h1>
+            <div className="flex justify-center gap-4">
+              <span className="h-1 w-12 bg-ki-teal rounded-full"></span>
+              <Sparkles className="text-ki-gold animate-pulse" size={20} />
+              <span className="h-1 w-12 bg-ki-teal rounded-full"></span>
+            </div>
+          </div>
         )}
 
         {isEditing ? (
           <div className="animate-fade-in-up">
-            <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-wide">Editor de Markdown</label>
+            <label className="block text-xs font-black text-gray-400 mb-4 uppercase tracking-[0.2em]">Editor de Sanación</label>
             <textarea
               value={editableContent}
               onChange={(e) => setEditableContent(e.target.value)}
-              className="w-full h-[600px] p-6 bg-gray-50 border-2 border-ki-purple/20 rounded-xl focus:border-ki-purple focus:ring-0 outline-none font-mono text-sm leading-relaxed text-gray-800 resize-none shadow-inner"
-              placeholder="Escribe tu artículo aquí..."
+              className="w-full h-[600px] p-8 bg-gray-50 border-2 border-ki-purple/10 rounded-3xl focus:border-ki-purple/30 focus:ring-0 outline-none font-mono text-sm leading-relaxed text-gray-800 resize-none shadow-inner"
+              placeholder="Escribe la canalización aquí..."
             />
-            <p className="mt-2 text-xs text-gray-400">
-              Tips: Usa # para títulos, **negrita** para énfasis. Lo que escribas aquí es lo que se enviará a Wix.
-            </p>
           </div>
         ) : (
           <>
-            <div className="markdown-body text-gray-700 leading-relaxed space-y-6">
+            <div className="markdown-body prose prose-lg max-w-none">
               <ReactMarkdown
                 components={{
-                  // Override specific elements to match KiFusion styling
-                  h1: ({node, ...props}) => <h2 className="hidden" {...props} />, // Hide H1 in body since we render Title separately
-                  h2: ({node, ...props}) => <h2 className="font-serif text-2xl font-bold text-ki-dark mt-8 mb-4 border-l-4 border-ki-teal pl-4" {...props} />,
-                  h3: ({node, ...props}) => <h3 className="font-sans text-xl font-semibold text-teal-600 mt-6 mb-3" {...props} />,
-                  p: ({node, ...props}) => <p className="mb-4 text-lg leading-8 font-light text-gray-700" {...props} />,
-                  ul: ({node, ...props}) => <ul className="list-disc pl-6 space-y-2 mb-6 text-gray-700" {...props} />,
-                  ol: ({node, ...props}) => <ol className="list-decimal pl-6 space-y-2 mb-6 text-gray-700" {...props} />,
-                  li: ({node, ...props}) => <li className="pl-1" {...props} />,
+                  h1: ({node, ...props}) => <h2 className="hidden" {...props} />,
+                  h2: ({node, ...props}) => <h2 className="font-serif text-3xl font-bold text-ki-purple mt-12 mb-6 border-b-2 border-ki-teal/20 pb-4" {...props} />,
+                  h3: ({node, ...props}) => <h3 className="font-sans text-xl font-bold text-ki-teal mt-8 mb-4 flex items-center gap-2" {...props} />,
+                  p: ({node, ...props}) => <p className="mb-6 text-lg leading-relaxed text-gray-600 font-light" {...props} />,
+                  blockquote: ({node, ...props}) => (
+                    <blockquote className="border-l-8 border-ki-gold pl-8 py-6 my-10 bg-ki-gold/5 rounded-r-3xl italic text-ki-dark font-serif text-xl" {...props} />
+                  ),
                   strong: ({node, ...props}) => <strong className="font-bold text-ki-purple" {...props} />,
-                  blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-ki-gold pl-4 py-2 my-6 bg-yellow-50/50 italic text-gray-600" {...props} />,
+                  li: ({node, ...props}) => <li className="mb-3 text-gray-600" {...props} />,
                 }}
               >
                 {contentToRender}
@@ -104,21 +98,21 @@ const BlogPostViewer: React.FC<Props> = ({ data, onUpdateContent }) => {
             </div>
 
             {isLongPost && (
-              <div className="mt-8 flex justify-center relative">
+              <div className="mt-12 flex justify-center relative">
                 {!isExpanded && (
-                  <div className="absolute -top-24 left-0 w-full h-24 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+                  <div className="absolute -top-32 left-0 w-full h-32 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
                 )}
                 <button
                   onClick={() => setIsExpanded(!isExpanded)}
-                  className="group flex items-center gap-2 px-6 py-3 rounded-full bg-gray-50 hover:bg-gray-100 border border-gray-200 text-ki-dark font-semibold transition-all hover:shadow-md z-10"
+                  className="group flex items-center gap-3 px-8 py-4 rounded-2xl bg-ki-dark text-white font-black text-xs uppercase tracking-widest transition-all hover:bg-ki-purple hover:shadow-2xl shadow-xl z-10"
                 >
                   {isExpanded ? (
                     <>
-                      Leer menos <ChevronUp size={18} className="text-ki-purple group-hover:-translate-y-0.5 transition-transform" />
+                      Contraer Artículo <ChevronUp size={16} />
                     </>
                   ) : (
                     <>
-                      Leer el artículo completo <ChevronDown size={18} className="text-ki-purple group-hover:translate-y-0.5 transition-transform" />
+                      Ver Artículo Completo <ChevronDown size={16} />
                     </>
                   )}
                 </button>
